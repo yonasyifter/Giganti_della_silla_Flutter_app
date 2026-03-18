@@ -1,0 +1,66 @@
+name: hikesilla
+description: HikeSilla — Smart hiking app for Parco Nazionale della Silla
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase — versions matching firebase_core 3.15.0 (already resolved in lock)
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+
+  #firebase_core: ^3.1.0
+  #firebase_auth: ^5.1.0        # Authentication (login/signup/reset)
+  #cloud_firestore: ^5.1.0      # Database (per-user scoped data)
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Navigation
+  go_router: ^14.3.0
+
+  # HTTP client
+  dio: ^5.7.0
+
+  # Maps
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # Location / GPS
+  geolocator: ^13.0.1
+
+  # Storage
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
+
+  # Voice / Speech (AI Guide)
+  flutter_tts: ^4.1.0
+  speech_to_text: ^7.0.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/core/assets/
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/core/assets/icon.jpg"

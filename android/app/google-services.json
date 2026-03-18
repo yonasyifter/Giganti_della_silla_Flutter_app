@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "526438270092",
+    "firebase_url": "https://iot-project-49099-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "iot-project-49099",
+    "storage_bucket": "iot-project-49099.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526438270092:android:cea3d286d471e53fe6a7a9",
+        "android_client_info": {
+          "package_name": "com.company.hikesilla"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAlzksJHN-iPGMtz39T8B_CTm7eLZhAAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526438270092:android:dfe52f16229cf024e6a7a9",
+        "android_client_info": {
+          "package_name": "com.example.my_iot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAlzksJHN-iPGMtz39T8B_CTm7eLZhAAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
