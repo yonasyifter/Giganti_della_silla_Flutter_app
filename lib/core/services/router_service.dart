@@ -8,6 +8,7 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/map/screens/map_screen.dart';
+import '../../features/map/screens/trails_list_screen.dart';
 import '../../features/weather/screens/weather_screen.dart';
 import '../../features/chatbot/screens/chatbot_screen.dart';
 import '../../features/emergency/screens/sos_screen.dart';
@@ -81,6 +82,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/sos',
           builder: (_, __) => const SosScreen()),
+      GoRoute(path: '/trails',
+          builder: (_, __) => const TrailsListScreen()),
     ],
   );
 });

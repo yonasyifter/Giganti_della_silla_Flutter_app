@@ -432,6 +432,8 @@ class _QuickActionsGrid extends StatelessWidget {
     final actions = [
       _Action(Icons.map_rounded, l.navMap, AppColors.primary,
           () => context.go('/map')),
+      _Action(Icons.terrain, l.trails, AppColors.easy,
+          () => context.push('/trails')),
       _Action(Icons.smart_toy_rounded, l.navAI, AppColors.accent,
           () => context.go('/chatbot')),
       _Action(Icons.cloud_rounded, l.navWeather, AppColors.info,
@@ -440,7 +442,7 @@ class _QuickActionsGrid extends StatelessWidget {
           () => context.push('/sos')),
     ];
     return GridView.count(
-      crossAxisCount: 4,
+      crossAxisCount: 5,
       crossAxisSpacing: 12,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -549,7 +551,7 @@ class _RecommendedTrails extends StatelessWidget {
         ),
         trailing: const Icon(Icons.arrow_forward_ios,
             color: AppColors.textHint, size: 14),
-        onTap: () => context.go('/map'),
+        onTap: () => context.push('/trails'),
       ),
     );
   }

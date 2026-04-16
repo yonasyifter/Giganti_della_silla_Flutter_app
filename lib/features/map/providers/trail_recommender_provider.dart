@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 import '../../preferences/models/user_preferences_model.dart';
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  TRAIL MODEL  —  mirrors the TRAILS constant in constants.js
@@ -20,8 +20,9 @@ import '../../preferences/models/user_preferences_model.dart';
 //    duration    String   e.g. "45 min"
 //    elevation   String   e.g. "50 m"
 //    features    Array<String>
-//    latitude    number   (optional, for map marker)
-//    longitude   number   (optional, for map marker)
+//    latitude    number   (optional, for map marker / trail start)
+//    longitude   number   (optional, for map marker / trail start)
+//    coords      Array<{lat: number, lng: number}>  (optional, trail polyline)
 // ─────────────────────────────────────────────────────────────────────────────
 class TrailModel {
   final String docId;       // Firestore document ID  e.g. "silentGiant"
@@ -37,6 +38,10 @@ class TrailModel {
   final List<String> features;
   final double latitude;
   final double longitude;
+  /// Trail polyline coordinates fetched from Firestore `coords` field.
+  /// Each element is a {lat, lng} map — same structure as the web-app.
+  /// Empty list means no polyline stored yet (marker-only mode).
+  final List<LatLng> coords;
 
   const TrailModel({
     required this.docId,
@@ -52,10 +57,41 @@ class TrailModel {
     required this.features,
     this.latitude  = 39.3551,
     this.longitude = 16.2232,
+    this.coords    = const [],
   });
+
+  /// Whether this trail has a drawable polyline stored in Firestore.
+  bool get hasPolyline => coords.length >= 2;
 
   factory TrailModel.fromFirestore(DocumentSnapshot doc) {
     final d = doc.data() as Map<String, dynamic>;
+
+    // ── Parse coords array  [{lat, lng}, ...] ──────────────────────────────
+    final rawCoords = d['coords'] as List?;
+    final List<LatLng> parsedCoords = [];
+    if (rawCoords != null) {
+      for (final pt in rawCoords) {
+        if (pt is Map) {
+          final lat = (pt['lat'] ?? pt['latitude']);
+          final lng = (pt['lng'] ?? pt['longitude']);
+          if (lat != null && lng != null) {
+            parsedCoords.add(LatLng(
+              (lat as num).toDouble(),
+              (lng as num).toDouble(),
+            ));
+          }
+        }
+      }
+    }
+
+    // Fallback centre lat/lng — use first coord point if available
+    final fallbackLat = parsedCoords.isNotEmpty
+        ? parsedCoords.first.latitude
+        : (d['latitude'] as num?)?.toDouble() ?? 39.3551;
+    final fallbackLng = parsedCoords.isNotEmpty
+        ? parsedCoords.first.longitude
+        : (d['longitude'] as num?)?.toDouble() ?? 16.2232;
+
     return TrailModel(
       docId:       doc.id,
       id:          d['id']          as String? ?? doc.id,
@@ -68,8 +104,9 @@ class TrailModel {
       duration:    d['duration']    as String? ?? '',
       elevation:   d['elevation']   as String? ?? '',
       features:    List<String>.from(d['features'] as List? ?? []),
-      latitude:    (d['latitude']  as num?)?.toDouble() ?? 39.3551,
-      longitude:   (d['longitude'] as num?)?.toDouble() ?? 16.2232,
+      latitude:    fallbackLat,
+      longitude:   fallbackLng,
+      coords:      parsedCoords,
     );
   }
 
@@ -111,7 +148,8 @@ const _trailRecommendations = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SEED TRAILS  —  mirrors TRAILS constant in constants.js exactly
-//  Used as fallback when Firestore 'trails' collection is empty
+//  Used as fallback when Firestore 'trails' collection is empty.
+//  Seed trails include approximate polyline coords for the Sila park area.
 // ─────────────────────────────────────────────────────────────────────────────
 const List<TrailModel> _seedTrails = [
   TrailModel(
@@ -122,6 +160,10 @@ const List<TrailModel> _seedTrails = [
     distance: '2.5 km', duration: '45 min', elevation: '50 m',
     features: ['Ancient Pines', 'Historical Markers', 'Wheelchair Accessible'],
     latitude: 39.358, longitude: 16.228,
+    coords: [
+      LatLng(39.358, 16.228), LatLng(39.3585, 16.2295), LatLng(39.359, 16.231),
+      LatLng(39.3595, 16.2325), LatLng(39.360, 16.234), LatLng(39.3605, 16.235),
+    ],
   ),
   TrailModel(
     docId: 'sunlitGlade', id: 'sunlit_glade',
@@ -131,6 +173,11 @@ const List<TrailModel> _seedTrails = [
     distance: '3 km', duration: '1 hour', elevation: '30 m',
     features: ['Wildflowers', 'Bird Watching', 'Photography Spots'],
     latitude: 39.362, longitude: 16.235,
+    coords: [
+      LatLng(39.362, 16.235), LatLng(39.3625, 16.237), LatLng(39.363, 16.239),
+      LatLng(39.3635, 16.241), LatLng(39.364, 16.243), LatLng(39.3645, 16.245),
+      LatLng(39.365, 16.247),
+    ],
   ),
   TrailModel(
     docId: 'ancientForest', id: 'ancient_forest',
@@ -140,6 +187,11 @@ const List<TrailModel> _seedTrails = [
     distance: '5 km', duration: '2 hours', elevation: '150 m',
     features: ['Old Growth Forest', 'Scenic Viewpoints', 'Wildlife Habitat'],
     latitude: 39.370, longitude: 16.218,
+    coords: [
+      LatLng(39.370, 16.218), LatLng(39.371, 16.220), LatLng(39.372, 16.222),
+      LatLng(39.373, 16.224), LatLng(39.374, 16.222), LatLng(39.373, 16.220),
+      LatLng(39.372, 16.218), LatLng(39.371, 16.218), LatLng(39.370, 16.218),
+    ],
   ),
   TrailModel(
     docId: 'deepSilaRidge', id: 'deep_sila_ridge',
@@ -149,6 +201,11 @@ const List<TrailModel> _seedTrails = [
     distance: '8 km', duration: '3.5 hours', elevation: '400 m',
     features: ['Panoramic Views', 'Diverse Ecosystems', 'Adventure Trail'],
     latitude: 39.375, longitude: 16.245,
+    coords: [
+      LatLng(39.375, 16.245), LatLng(39.376, 16.248), LatLng(39.377, 16.251),
+      LatLng(39.378, 16.254), LatLng(39.379, 16.257), LatLng(39.380, 16.260),
+      LatLng(39.381, 16.263), LatLng(39.382, 16.266), LatLng(39.383, 16.269),
+    ],
   ),
   TrailModel(
     docId: 'peakOfGiants', id: 'peak_of_giants',
@@ -158,6 +215,12 @@ const List<TrailModel> _seedTrails = [
     distance: '10 km', duration: '4 hours', elevation: '600 m',
     features: ['Summit Views', 'Historic Sites', 'Photo Opportunities'],
     latitude: 39.380, longitude: 16.255,
+    coords: [
+      LatLng(39.380, 16.255), LatLng(39.381, 16.258), LatLng(39.382, 16.261),
+      LatLng(39.383, 16.264), LatLng(39.384, 16.267), LatLng(39.385, 16.270),
+      LatLng(39.386, 16.273), LatLng(39.387, 16.276), LatLng(39.388, 16.279),
+      LatLng(39.389, 16.282),
+    ],
   ),
   TrailModel(
     docId: 'mainParkLoop', id: 'main_park_loop',
@@ -167,6 +230,12 @@ const List<TrailModel> _seedTrails = [
     distance: '6 km', duration: '2.5 hours', elevation: '200 m',
     features: ['Varied Terrain', 'Family Friendly', 'Interpretive Signs'],
     latitude: 39.355, longitude: 16.225,
+    coords: [
+      LatLng(39.355, 16.225), LatLng(39.356, 16.228), LatLng(39.357, 16.231),
+      LatLng(39.358, 16.234), LatLng(39.359, 16.237), LatLng(39.360, 16.234),
+      LatLng(39.359, 16.231), LatLng(39.358, 16.228), LatLng(39.357, 16.225),
+      LatLng(39.356, 16.225), LatLng(39.355, 16.225),
+    ],
   ),
 ];
 
@@ -215,13 +284,18 @@ class TrailRecommenderNotifier extends StateNotifier<TrailRecommenderState> {
     state = state.copyWith(isLoading: true, error: null);
 
     List<TrailModel> trails;
+    bool usedSeed = false;
     try {
       final snapshot = await _db.collection('trails').get();
-      trails = snapshot.docs.isNotEmpty
-          ? snapshot.docs.map(TrailModel.fromFirestore).toList()
-          : _seedTrails;
+      if (snapshot.docs.isNotEmpty) {
+        trails = snapshot.docs.map(TrailModel.fromFirestore).toList();
+      } else {
+        trails = _seedTrails;
+        usedSeed = true;
+      }
     } catch (_) {
       trails = _seedTrails;
+      usedSeed = true;
     }
 
     // ── Apply TRAIL_RECOMMENDATIONS lookup (same logic as constants.js) ──
@@ -243,7 +317,7 @@ class TrailRecommenderNotifier extends StateNotifier<TrailRecommenderState> {
       allTrails:   trails,
       recommended: recommended,
       isLoading:   false,
-      error: trails == _seedTrails ? 'Showing built-in trails (Firestore offline)' : null,
+      error: usedSeed ? 'Showing built-in trails (Firestore offline)' : null,
     );
   }
 }
