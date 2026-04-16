@@ -186,4 +186,11 @@ extension AppLocalizationsExtra on AppLocalizations {
   String get chatbotTitle => _t(en: 'AI Park Guide', it: 'Guida IA del Parco', fr: 'Guide IA du Parc', de: 'KI-Parkführer', es: 'Guía IA del Parque');
   String get sosButton => _t(en: 'Hold to send SOS', it: 'Tieni premuto per SOS', fr: 'Maintenir pour envoyer SOS', de: 'Halten zum SOS senden', es: 'Mantener para enviar SOS');
   String get prefsTitle => _t(en: 'Hiker Preferences', it: 'Preferenze escursionista', fr: 'Préférences randonneur', de: 'Wandererpräferenzen', es: 'Preferencias del senderista');
+  String get navGuide => _t(en: 'Guide', it: 'Guida', fr: 'Guide', de: 'Anleitung', es: 'Guía');
+  String get navParking => _t(en: 'Parking', it: 'Parcheggio', fr: 'Parking', de: 'Parken', es: 'Estacionamiento');
+  String get navTracking => _t(en: 'Tracking', it: 'Tracciamento', fr: 'Suivi', de: 'Tracking', es: 'Rastreo');
+  String get parkingTitle => _t(en: 'My Parking', it: 'Il mio parcheggio', fr: 'Mon stationnement', de: 'Mein Parkplatz', es: 'Mi estacionamiento');
+  String get trackingTitle => _t(en: 'Hiker Tracking', it: 'Tracciamento escursionista', fr: 'Suivi randonneur', de: 'Wanderer-Tracking', es: 'Rastreo del senderista');
+  String get guideTitle => _t(en: 'App Guide', it: 'Guida App', fr: 'Guide App', de: 'App-Anleitung', es: 'Guía de la App');
+  String get aiGuideLabel => _t(en: 'AI Guide', it: 'Guida IA', fr: 'Guide IA', de: 'KI-Guide', es: 'Guía IA');
 }

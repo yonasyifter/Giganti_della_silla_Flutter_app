@@ -304,18 +304,32 @@ class ChatbotNotifier extends StateNotifier<ChatbotState> {
     _silenceTimer?.cancel();
     _addUserMessage(text.trim(), isVoice: isVoice);
 
+    // Build history for context (last 8 messages, alternating user/assistant)
+    final history = state.messages
+        .where((m) => m.role == ChatRole.user || m.role == ChatRole.assistant)
+        .toList()
+        .reversed
+        .take(8)
+        .toList()
+        .reversed
+        .map((m) => {
+              'role': m.role == ChatRole.user ? 'user' : 'assistant',
+              'content': m.content,
+            })
+        .toList();
+
     try {
       final response = await _api.sendChatMessage(
         message: text.trim(),
         language: state.language,
+        history: history,
       );
       final answer = response['answer'] as String? ??
           'Sorry, I could not get a response.';
       _addAssistantMessage(answer, speak: isVoice || state.ttsEnabled);
     } catch (e) {
       _addAssistantMessage(
-        '⚠️ I had trouble connecting to the server. '
-        'Please check your connection and try again.',
+        '⚠️ I had trouble connecting. Please check your internet connection.',
         speak: false,
       );
       // Re-enable VAD after error

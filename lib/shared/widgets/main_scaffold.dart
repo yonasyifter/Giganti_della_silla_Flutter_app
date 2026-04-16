@@ -60,14 +60,15 @@ class MainScaffold extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/sos'),
-        backgroundColor: AppColors.danger,
+        onPressed: () => context.go('/chatbot'),
+        backgroundColor: AppColors.accent,
         elevation: 8,
+        tooltip: 'AI Guide',
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sos_rounded, color: Colors.white, size: 22),
-            Text('SOS', style: TextStyle(
+            Icon(Icons.smart_toy_rounded, color: Colors.white, size: 22),
+            Text('AI', style: TextStyle(
                 color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
           ],
         ),

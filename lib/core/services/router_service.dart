@@ -15,6 +15,9 @@ import '../../features/emergency/screens/sos_screen.dart';
 import '../../features/preferences/screens/preferences_screen.dart';
 import '../../features/preferences/screens/recommended_trails_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/guide/screens/guide_screen.dart';
+import '../../features/tracking/screens/tracking_screen.dart';
+import '../../features/parking/screens/parking_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../features/auth/providers/firebase_provider.dart';
 
@@ -87,6 +90,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (_, __) => const SosScreen()),
       GoRoute(path: '/trails',
           builder: (_, __) => const TrailsListScreen()),
+      GoRoute(path: '/guide',
+          builder: (_, __) => const GuideScreen()),
+      GoRoute(path: '/tracking',
+          builder: (_, __) => const TrackingScreen()),
+      GoRoute(path: '/parking',
+          builder: (_, __) => const ParkingScreen()),
     ],
   );
 });

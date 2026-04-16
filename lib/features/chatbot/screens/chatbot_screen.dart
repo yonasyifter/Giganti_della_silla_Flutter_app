@@ -173,7 +173,7 @@ class _ChatHeader extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Ciao',
+          const Text('AI Guide',
               style: TextStyle(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -250,7 +250,7 @@ class _ChatHeader extends ConsumerWidget {
               border: Border.all(color: AppColors.surfaceLight),
             ),
             child: Text(
-              chatbot.language == 'en' ? '🇬🇧 EN' : '🇮🇹 IT',
+              _langFlag(chatbot.language),
               style: const TextStyle(fontSize: 13),
             ),
           ),
@@ -290,6 +290,16 @@ class _ChatHeader extends ConsumerWidget {
       case ChatbotStatus.thinking:  return 'Thinking...';
       case ChatbotStatus.speaking:  return 'Speaking...';
       default:                      return 'Ready';
+    }
+  }
+
+  String _langFlag(String lang) {
+    switch (lang) {
+      case 'it': return '🇮🇹 IT';
+      case 'fr': return '🇫🇷 FR';
+      case 'de': return '🇩🇪 DE';
+      case 'es': return '🇪🇸 ES';
+      default:   return '🇬🇧 EN';
     }
   }
 }
