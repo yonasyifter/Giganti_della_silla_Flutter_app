@@ -14,6 +14,7 @@ class MainScaffold extends ConsumerWidget {
     if (location.startsWith('/weather')) return 2;
     if (location.startsWith('/chatbot')) return 3;
     if (location.startsWith('/preferences')) return 4;
+    if (location.startsWith('/recommended-trails')) return 4;
     return 0;
   }
 

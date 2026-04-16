@@ -146,7 +146,8 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
         ),
       );
       // Navigate to the dedicated recommended trails screen
-      context.push('/recommended-trails');
+      // Use context.go (not push) to avoid shell route stack conflicts
+      context.go('/recommended-trails');
     }
   }
 

@@ -64,9 +64,9 @@ class RecommendedTrailsScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(children: [
-                  // Back button
+                  // Back button — use go() not pop() since we arrived via go()
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => context.go('/preferences'),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -181,7 +181,7 @@ class RecommendedTrailsScreen extends ConsumerWidget {
                         child: CircularProgressIndicator(
                             color: AppColors.primaryLight))
                     : matched.isEmpty
-                        ? _EmptyState(onBack: () => context.pop())
+                        ? _EmptyState(onBack: () => context.go('/preferences'))
                         : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                             itemCount: matched.length,

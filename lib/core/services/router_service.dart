@@ -79,14 +79,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, __) => const ChatbotScreen()),
           GoRoute(path: '/preferences',
               builder: (_, __) => const PreferencesScreen()),
+          GoRoute(path: '/recommended-trails',
+              builder: (_, __) => const RecommendedTrailsScreen()),
         ],
       ),
       GoRoute(path: '/sos',
           builder: (_, __) => const SosScreen()),
       GoRoute(path: '/trails',
           builder: (_, __) => const TrailsListScreen()),
-      GoRoute(path: '/recommended-trails',
-          builder: (_, __) => const RecommendedTrailsScreen()),
     ],
   );
 });
