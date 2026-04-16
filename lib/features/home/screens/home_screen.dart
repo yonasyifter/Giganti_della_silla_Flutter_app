@@ -450,6 +450,8 @@ class _QuickActionsGrid extends StatelessWidget {
     return GridView.count(
       crossAxisCount: 5,
       crossAxisSpacing: 12,
+      // Give each cell more height than width so the icon + label fit
+      childAspectRatio: 0.78,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: actions,
@@ -468,22 +470,30 @@ class _Action extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(
-          width: 52, height: 52,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withValues(alpha: 0.3)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Icon(icon, color: color, size: 24),
           ),
-          child: Icon(icon, color: color, size: 26),
-        ),
-        const SizedBox(height: 8),
-        Text(label,
+          const SizedBox(height: 6),
+          Text(
+            label,
             style: const TextStyle(
-                color: AppColors.textSecondary, fontSize: 11),
-            textAlign: TextAlign.center),
-      ]),
+                color: AppColors.textSecondary, fontSize: 10),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
