@@ -13,6 +13,7 @@ import '../../features/weather/screens/weather_screen.dart';
 import '../../features/chatbot/screens/chatbot_screen.dart';
 import '../../features/emergency/screens/sos_screen.dart';
 import '../../features/preferences/screens/preferences_screen.dart';
+import '../../features/preferences/screens/recommended_trails_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../features/auth/providers/firebase_provider.dart';
@@ -84,6 +85,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (_, __) => const SosScreen()),
       GoRoute(path: '/trails',
           builder: (_, __) => const TrailsListScreen()),
+      GoRoute(path: '/recommended-trails',
+          builder: (_, __) => const RecommendedTrailsScreen()),
     ],
   );
 });
