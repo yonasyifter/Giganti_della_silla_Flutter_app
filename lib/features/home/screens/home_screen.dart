@@ -42,9 +42,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (prefs != null) ref.read(trailRecommenderProvider.notifier).load(prefs);
     });
 
-    // Safe initial for avatar
+    // Avatar initial: prefer displayName, fall back to email prefix, then '?'
     final displayName = auth.user?.displayName ?? '';
-    final initial = displayName.isNotEmpty ? displayName.substring(0, 1).toUpperCase() : 'H';
+    final email = auth.user?.email ?? '';
+    final _nameForInitial = displayName.isNotEmpty
+        ? displayName
+        : (email.contains('@') ? email.split('@').first : '');
+    final initial = _nameForInitial.isNotEmpty
+        ? _nameForInitial.substring(0, 1).toUpperCase()
+        : '?';
 
     return Scaffold(
       body: Container(

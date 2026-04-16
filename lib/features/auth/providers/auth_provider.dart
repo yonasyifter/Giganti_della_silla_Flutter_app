@@ -2,9 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 
-
-// ── Raw Firebase Auth user stream ──────────────────────────────────────────
-
 // ── App-level auth state ───────────────────────────────────────────────────
 class AuthState {
   final UserModel? user;
@@ -33,19 +30,31 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
 
-  // Lazy getter — never accessed until Firebase is confirmed initialized
   FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  /// Called from SplashScreen — maps Firebase current user → AuthState
+  /// Derives a display name: prefers Firebase displayName, then email prefix.
+  /// e.g. "yonasyifter@gmail.com" → "yonasyifter"
+  String _resolveDisplayName(User fbUser) {
+    final name = fbUser.displayName?.trim() ?? '';
+    if (name.isNotEmpty) return name;
+    final email = fbUser.email ?? '';
+    if (email.contains('@')) return email.split('@').first;
+    return 'Hiker';
+  }
+
+  /// Called from SplashScreen — maps Firebase current user → AuthState.
+  /// Reloads the user first to ensure the latest displayName is fetched.
   Future<void> checkAuth() async {
     final fbUser = _auth.currentUser;
     if (fbUser != null) {
+      // Reload ensures we get the latest profile (e.g. after updateDisplayName)
+      await fbUser.reload();
+      final refreshed = _auth.currentUser!;
       state = AuthState(
         user: UserModel(
-          uid: fbUser.uid,
-          email: fbUser.email ?? '',
-          displayName: fbUser.displayName ?? fbUser.email ?? 'Hiker',
-
+          uid: refreshed.uid,
+          email: refreshed.email ?? '',
+          displayName: _resolveDisplayName(refreshed),
         ),
       );
     }
@@ -59,12 +68,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email.trim(),
         password: password.trim(),
       );
-      final fbUser = credential.user!;
+      // Reload to ensure displayName is fresh after any prior updateDisplayName
+      await credential.user!.reload();
+      final fbUser = _auth.currentUser!;
       state = AuthState(
         user: UserModel(
           uid: fbUser.uid,
           email: fbUser.email ?? '',
-          displayName: fbUser.displayName ?? fbUser.email ?? 'Hiker',
+          displayName: _resolveDisplayName(fbUser),
         ),
       );
       return true;
@@ -87,7 +98,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       await credential.user!.updateDisplayName(displayName.trim());
       await credential.user!.reload();
-      state = state.copyWith(isLoading: false);
+      final fbUser = _auth.currentUser!;
+      // Set full AuthState so the home screen immediately shows the correct initial
+      state = AuthState(
+        user: UserModel(
+          uid: fbUser.uid,
+          email: fbUser.email ?? '',
+          displayName: _resolveDisplayName(fbUser),
+        ),
+      );
       return true;
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(isLoading: false, error: _friendlyError(e.code));
