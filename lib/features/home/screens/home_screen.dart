@@ -454,11 +454,11 @@ class _QuickActionsGrid extends StatelessWidget {
           () => context.push('/sos')),
     ];
     return GridView.count(
-      crossAxisCount: 4,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      // Give each cell more height than width so the icon + label fit
-      childAspectRatio: 0.82,
+      crossAxisCount: 3,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      // Give each cell enough height for icon + label
+      childAspectRatio: 1.05,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: actions,
@@ -482,19 +482,21 @@ class _Action extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 48, height: 48,
+            width: 56, height: 56,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.withValues(alpha: 0.35)),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 28),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             label,
             style: const TextStyle(
-                color: AppColors.textSecondary, fontSize: 10),
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w500),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

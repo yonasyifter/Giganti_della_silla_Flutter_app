@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/l10n/locale_provider.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -15,6 +16,18 @@ class SettingsScreen extends ConsumerWidget {
     final auth = ref.watch(authProvider);
     final locale = ref.watch(localeProvider);
     final langName = kLanguageNames[locale.languageCode] ?? '🌐';
+    final themeNotifier = ref.read(themeModeProvider.notifier);
+    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
+
+    // Avatar initial: prefer displayName, fall back to email prefix
+    final displayName = auth.user?.displayName ?? '';
+    final email = auth.user?.email ?? '';
+    final nameForInitial = displayName.isNotEmpty
+        ? displayName
+        : (email.contains('@') ? email.split('@').first : '');
+    final initial = nameForInitial.isNotEmpty
+        ? nameForInitial.substring(0, 1).toUpperCase()
+        : '?';
 
     return Scaffold(
       body: Container(
@@ -56,11 +69,7 @@ class SettingsScreen extends ConsumerWidget {
                             radius: 30,
                             backgroundColor: AppColors.primary,
                             child: Text(
-                              (auth.user?.displayName ?? 'H').isEmpty
-                                  ? 'H'
-                                  : auth.user!.displayName
-                                      .substring(0, 1)
-                                      .toUpperCase(),
+                              initial,
                               style: const TextStyle(
                                   fontSize: 22,
                                   color: Colors.white,
@@ -72,11 +81,17 @@ class SettingsScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(auth.user?.displayName ?? '—',
-                                    style: const TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                Text(
+                                  displayName.isNotEmpty
+                                      ? displayName
+                                      : (nameForInitial.isNotEmpty
+                                          ? nameForInitial
+                                          : '—'),
+                                  style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
                                 const SizedBox(height: 4),
                                 Text(auth.user?.email ?? '—',
                                     style: const TextStyle(
@@ -86,6 +101,31 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                         ]),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Appearance ─────────────────────────────────
+                      _SectionHeader('Appearance'),
+                      _SettingsTile(
+                        icon: isDark
+                            ? Icons.dark_mode_rounded
+                            : Icons.light_mode_rounded,
+                        iconColor: isDark
+                            ? const Color(0xFF7C4DFF)
+                            : const Color(0xFFFF9800),
+                        title: isDark ? 'Dark Mode' : 'Light Mode',
+                        subtitle: isDark
+                            ? 'Tap to switch to light theme'
+                            : 'Tap to switch to dark theme',
+                        trailing: Switch(
+                          value: isDark,
+                          onChanged: (_) => themeNotifier.toggle(),
+                          activeColor: const Color(0xFF7C4DFF),
+                          inactiveThumbColor: const Color(0xFFFF9800),
+                          inactiveTrackColor:
+                              const Color(0xFFFF9800).withValues(alpha: 0.3),
+                        ),
+                        onTap: () => themeNotifier.toggle(),
                       ),
                       const SizedBox(height: 24),
 
@@ -204,7 +244,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-// ── Language sheet (reused from picker) ───────────────────────────────────
+// ── Language sheet ─────────────────────────────────────────────────────────
 class _LanguageSheet extends StatelessWidget {
   final Locale current;
   final WidgetRef ref;
@@ -222,7 +262,8 @@ class _LanguageSheet extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                     color: AppColors.surfaceLight,
                     borderRadius: BorderRadius.circular(2)),
@@ -245,8 +286,8 @@ class _LanguageSheet extends StatelessWidget {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.primary.withValues(alpha: 0.2)
@@ -287,6 +328,7 @@ class _LanguageSheet extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader(this.title);
+
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
@@ -332,7 +374,8 @@ class _SettingsTile extends StatelessWidget {
         ),
         child: Row(children: [
           Container(
-            width: 36, height: 36,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
@@ -364,6 +407,3 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
-
-// expose for use in language_picker.dart
-String get profile => 'Profile';

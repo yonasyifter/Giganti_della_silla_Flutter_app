@@ -47,10 +47,31 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                               onPressed: () => ref.read(weatherProvider.notifier).loadWeather(),
                               icon: const Icon(Icons.refresh, color: AppColors.primaryLight),
                             ),
-                          ],
+                          
                         ),
                         Text(AppLocalizations.of(context).parkName,
                             style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                        if (weather.isOffline) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.warning.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+                            ),
+                            child: Row(children: [
+                              const Icon(Icons.wifi_off, color: AppColors.warning, size: 16),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'IoT API offline — showing demo data. Set weatherApiBaseUrl to your PC LAN IP.',
+                                  style: TextStyle(color: AppColors.warning, fontSize: 11),
+                                ),
+                              ),
+                            ]),
+                          ),
+                        ],
                         const SizedBox(height: 24),
 
                         // Main weather card
@@ -64,10 +85,11 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                         const SizedBox(height: 20),
 
                         // Sensor zones
-                        if (weather.zones.isNotEmpty) ...[
-                          Text('Sensor Zones', style: Theme.of(context).textTheme.titleLarge),
+                        if (weather.history.isNotEmpty) ...[
+                          Text('IoT Sensor History', style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
-                          ...weather.zones.map((z) => _ZoneCard(zone: z)),
+                          _SensorHistoryCard(reading: weather.history.first),
+                          const SizedBox(height: 20),
                         ],
 
                         // Weather tips
@@ -198,15 +220,20 @@ class _MetricsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final r = weather.latest;
     final metrics = [
       _Metric('Temperature', weather.temperatureText, Icons.thermostat, AppColors.warning),
-      _Metric('Humidity', '${weather.humidity?.toStringAsFixed(1) ?? '—'}%', Icons.water_drop, AppColors.info),
-      _Metric('Noise Level', '${weather.noise?.toStringAsFixed(0) ?? '—'} dB', Icons.volume_up, AppColors.accent),
-      _Metric('Light', weather.light?.toStringAsFixed(0) ?? '—', Icons.wb_sunny, AppColors.warning),
-      _Metric('Pressure',
-          '${((weather.pressure ?? 0) / 1000).toStringAsFixed(2)} kPa',
-          Icons.compress, AppColors.primaryLight),
+      _Metric('Humidity', '\${weather.humidity?.toStringAsFixed(1) ?? '--'}%', Icons.water_drop, AppColors.info),
+      _Metric('Noise', '\${weather.noise?.toStringAsFixed(0) ?? '--'} dB', Icons.volume_up, AppColors.accent),
+      _Metric('Light', '\${weather.light?.toStringAsFixed(0) ?? '--'} lux', Icons.wb_sunny, AppColors.warning),
+      _Metric('Pressure', '\${weather.pressure?.toStringAsFixed(1) ?? '--'} hPa', Icons.compress, AppColors.primaryLight),
       _Metric('Forecast', weather.prediction, Icons.cloud, AppColors.info),
+      _Metric('Distance (ToF)', '\${r?.tof.toStringAsFixed(1) ?? '--'} mm', Icons.straighten, AppColors.easy),
+      _Metric('Tilt Angle', '\${r?.angle.toStringAsFixed(1) ?? '--'}°', Icons.rotate_90_degrees_ccw, AppColors.moderate),
+      _Metric('Acc X', '\${r?.accX.toStringAsFixed(3) ?? '--'} g', Icons.swap_horiz, AppColors.hard),
+      _Metric('Acc Y', '\${r?.accY.toStringAsFixed(3) ?? '--'} g', Icons.swap_vert, AppColors.hard),
+      _Metric('Acc Z', '\${r?.accZ.toStringAsFixed(3) ?? '--'} g', Icons.height, AppColors.hard),
+      _Metric('Vibr X', '\${r?.vibrAccX.toStringAsFixed(3) ?? '--'} g', Icons.vibration, AppColors.danger),
     ];
 
     return GridView.count(
@@ -261,54 +288,50 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-class _ZoneCard extends StatelessWidget {
-  final Map<String, dynamic> zone;
-  const _ZoneCard({required this.zone});
+class _SensorHistoryCard extends StatelessWidget {
+  final SensorReading reading;
+  const _SensorHistoryCard({required this.reading});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.surfaceLight),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
+          Row(children: [
+            const Icon(Icons.sensors, color: AppColors.primaryLight, size: 18),
+            const SizedBox(width: 8),
+            Text('Device ${reading.deviceId}',
+                style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
+            const Spacer(),
+            Text(
+              '${reading.time.hour.toString().padLeft(2, '0')}:'
+              '${reading.time.minute.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: AppColors.textHint, fontSize: 12),
             ),
-            child: const Center(
-              child: Text('📡', style: TextStyle(fontSize: 20)),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Device ${zone['device_id']}',
-                    style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                Text(
-                  '${zone['prediction']} · ${(zone['temperature'] as num?)?.toStringAsFixed(1) ?? '—'}°C',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          ]),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              Text('💧 ${(zone['humidity'] as num?)?.toStringAsFixed(0) ?? '—'}%',
-                  style: const TextStyle(color: AppColors.info, fontSize: 11)),
-              Text('🔊 ${(zone['noise'] as num?)?.toStringAsFixed(0) ?? '—'}dB',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              _SensorChip('🌡️ ${reading.temperature.toStringAsFixed(1)}°C'),
+              _SensorChip('💧 ${reading.humidity.toStringAsFixed(0)}%'),
+              _SensorChip('🔊 ${reading.noise.toStringAsFixed(0)} dB'),
+              _SensorChip('☀️ ${reading.light.toStringAsFixed(0)} lux'),
+              _SensorChip('📏 ToF ${reading.tof.toStringAsFixed(0)} mm'),
+              _SensorChip('📐 ${reading.angle.toStringAsFixed(1)}°'),
+              _SensorChip('📳 Vib ${reading.vibrAccX.toStringAsFixed(2)}g'),
+              _SensorChip('🌤️ ${reading.weatherPrediction}'),
             ],
           ),
         ],
@@ -316,6 +339,26 @@ class _ZoneCard extends StatelessWidget {
     );
   }
 }
+
+class _SensorChip extends StatelessWidget {
+  final String label;
+  const _SensorChip(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(label,
+          style: const TextStyle(
+              color: AppColors.textPrimary, fontSize: 11)),
+    );
+  }
+}
+
 
 class _WeatherTips extends StatelessWidget {
   final String prediction;

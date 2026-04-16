@@ -1,7 +1,19 @@
 class AppConstants {
-  // FastAPI backend (weather sensors + AI chatbot)
+  // ── FastAPI backend (weather sensors + AI chatbot) ────────────────────────
+  // NOTE: Replace with your PC's local network IP when running on a real device.
+  // Find your IP: `ipconfig` (Windows) or `ifconfig` (Mac/Linux)
+  // Example: static const String baseUrl = 'http://192.168.1.100:8000';
   static const String baseUrl = 'http://localhost:8000';
   static const String wsBaseUrl = 'ws://localhost:8000';
+
+  // ── Weather IoT API ───────────────────────────────────────────────────────
+  // Same host as baseUrl. Override this constant with your LAN IP when testing
+  // on a physical Android device so the phone can reach the Docker container:
+  //   static const String weatherApiBaseUrl = 'http://192.168.1.100:8000';
+  static const String weatherApiBaseUrl = baseUrl;
+
+  // Sensor measurement name used in the InfluxDB query
+  static const String weatherMeasurement = 'Sensor_S6000U_data2';
 
   // Weather / sensor endpoints (FastAPI + InfluxDB)
   static const String weatherForecastEndpoint = '/api/weather/forecast/';
